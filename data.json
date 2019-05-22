@@ -1,0 +1,28 @@
+{
+  "modes": [
+    {
+      "mode": "Reading Articles (Tech)",
+      "tooltip": "Learning technology"
+    },
+    {
+      "mode": "Research",
+      "tooltip": "Researching something"
+    },
+    {
+      "mode": "Programming",
+      "tooltip": "General programming"
+    },
+    {
+      "mode": "Reading Articles (Science)",
+      "tooltip": "General programming"
+    },
+    {
+      "mode": "Mobile Chill",
+      "tooltip": "Mobile"
+    },
+    {
+      "mode": "cwitch programming",
+      "tooltip": "cwitch"
+    }
+  ]
+}
