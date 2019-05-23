@@ -9,7 +9,8 @@ import (
 	"time"
 
 	"github.com/getlantern/systray"
-	"github.com/raunaqrox/cwitch/utils"
+	"github.com/promignis/cwitch/icon"
+	"github.com/promignis/cwitch/utils"
 )
 
 var menuMap map[string]*Timer
@@ -145,7 +146,9 @@ func HandleInterrupts() {
 
 func onReady() {
 	createMenuItems(menus)
-	systray.SetTitle("Conscious switch")
+	// systray.SetTitle("cwitch")
+	systray.SetIcon(icon.Data)
+
 	systray.SetTooltip("Switch between activities consciously")
 	mQuit := systray.AddMenuItem("Quit", "Quit the whole app")
 

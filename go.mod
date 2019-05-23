@@ -1,4 +1,4 @@
-module github.com/raunaqrox/cwitch
+module github.com/promignis/cwitch
 
 go 1.12
 

@@ -23,6 +23,10 @@
     {
       "mode": "cwitch programming",
       "tooltip": "cwitch"
+    },
+    {
+      "mode": "Writing",
+      "tooltip": "Writing"
     }
   ]
 }
