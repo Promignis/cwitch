@@ -1,7 +1,8 @@
 <p align="center">
   <img alt="cwitch logo" src="https://raw.githubusercontent.com/promignis/cwitch/master/assets/logo.png" />
   <p align="center">
-      <a href="https://circleci.com/gh/Promignis/cwitch"><img alt="CircleCi Build Status" src="https://circleci.com/gh/Promignis/cwitch.svg?style=shield"></a>
+      <a href="https://circleci.com/gh/Promignis/cwitch"><img alt="CircleCi Build Status" src="https://circleci.com/gh/Promignis/cwitch.svg?style=flat-square"></a>
+      <a href="/LICENSE.md"><img alt="Software License" src="https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square"></a>
   </p>
 </p>
 
