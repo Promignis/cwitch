@@ -1,9 +1,13 @@
-![cwitch - Conscious Switch](assets/logo.png)
+<p align="center">
+  <img alt="cwitch logo" src="https://raw.githubusercontent.com/promignis/cwitch/master/assets/logo.png" />
+</p>
+   
 
 Conscious Swtich (cwitch, pronounced switch)
 is a cross platform system tray app that allows you
 create some modes via a json file(`data.json`) and
 tracks the time you spend between these modes.
-Aim is to switch between tasks, modes etc consciously and mindfully.
 
-It's aim is to help you reduce unconscious and mindless activities.
+Great way to switch between tasks, modes etc consciously and mindfully.
+
+It's aim is to help you reduce unconscious and mindless activities(browser tab switches, social media, youtube etc)
