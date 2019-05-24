@@ -1,8 +1,9 @@
 <p align="center">
   <img alt="cwitch logo" src="https://raw.githubusercontent.com/promignis/cwitch/master/assets/logo.png" />
+  <p align="center">
+      <a href="https://circleci.com/gh/Promignis/cwitch"><img alt="CircleCi Build Status" src="https://circleci.com/gh/Promignis/cwitch.svg?style=shield"></a>
+  </p>
 </p>
-   
-[![CircleCI](https://circleci.com/gh/Promignis/cwitch.svg?style=shield)](https://circleci.com/gh/Promignis/cwitch)
 
 Conscious Swtich (cwitch, pronounced switch)
 is a cross platform system tray app that allows you
