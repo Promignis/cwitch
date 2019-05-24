@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -9,37 +10,13 @@ import (
 	"time"
 
 	"github.com/getlantern/systray"
+	"github.com/promignis/cwitch/config"
 	"github.com/promignis/cwitch/icon"
+	"github.com/promignis/cwitch/timer"
 	"github.com/promignis/cwitch/utils"
 )
 
-var menuMap map[string]*Timer
-
-const (
-	menuDataPath = "./data.json"
-	dataSavePath = "./saved.json"
-)
-
-type Timer struct {
-	IsEnabled     bool
-	OnStart       time.Time
-	Elapsed       time.Duration
-	PrettyElapsed string
-	MenuItem      *systray.MenuItem `json:"-"`
-}
-
-func (t *Timer) Begin() {
-	t.IsEnabled = true
-	t.OnStart = time.Now()
-	t.MenuItem.Check()
-}
-
-func (t *Timer) End() {
-	t.IsEnabled = false
-	t.Elapsed += time.Since(t.OnStart)
-	t.PrettyElapsed = t.Elapsed.String()
-	t.MenuItem.Uncheck()
-}
+const menuDataPath = "./data.json"
 
 type Menu struct {
 	Mode    string `json:"mode"`
@@ -53,27 +30,30 @@ type Menus struct {
 var menus *Menus
 var prevModeSelected string
 
+var menuMap timer.TimerMap
+
 func InitMenu() {
-	menuMap = make(map[string]*Timer)
+	menuMap = config.GetTimerMap()
 
-	isExist, err := utils.FileExists(dataSavePath)
+	// isExist, err := utils.FileExists(dataSavePath)
 
-	if isExist && err != nil {
-		// some error while checking file stat
-		log.Fatalf("Error while checking file existence %s", err.Error())
-	} else if isExist && err == nil {
-		// actually file exists
-		menuMapData, err := ioutil.ReadFile(dataSavePath)
-		if err != nil {
-			log.Printf("Error reading file %s", dataSavePath)
-		}
-		json.Unmarshal(menuMapData, &menuMap)
-	}
+	// if isExist && err != nil {
+	// 	// some error while checking file stat
+	// 	log.Fatalf("Error while checking file existence %s", err.Error())
+	// } else if isExist && err == nil {
+	// 	// actually file exists
+	// 	menuMapData, err := ioutil.ReadFile(dataSavePath)
+	// 	if err != nil {
+	// 		log.Printf("Error reading file %s", dataSavePath)
+	// 	}
+	// 	json.Unmarshal(menuMapData, &timer.MenuMap)
+	// }
 
+	// fetch value from data.json
 	menuData, err := ioutil.ReadFile(menuDataPath)
-	if err != nil {
-		log.Fatal("Error in reading file %s", menuDataPath)
-	}
+
+	utils.FailOnError(fmt.Sprintf("Error in reading file %s", menuDataPath), err)
+
 	json.Unmarshal(menuData, &menus)
 }
 
@@ -85,11 +65,12 @@ func main() {
 }
 
 func HandleMenuItem(menuStr string, ch chan struct{}) {
-	for msg := range ch {
-		_ = msg
-		timer := menuMap[menuStr]
+	for m := range ch {
+		// just an empty struct
+		_ = m
+		currentTimer := menuMap[menuStr]
 
-		var prevTimer *Timer
+		var prevTimer *timer.Timer
 		if prevModeSelected == "" {
 			// first time
 			prevModeSelected = menuStr
@@ -98,12 +79,12 @@ func HandleMenuItem(menuStr string, ch chan struct{}) {
 			prevTimer = menuMap[prevModeSelected]
 		}
 
-		if timer.IsEnabled {
+		if currentTimer.IsEnabled {
 			// clicked on what is already enabled
 			// end it
-			timer.End()
+			currentTimer.End()
 		} else {
-			timer.Begin()
+			currentTimer.Begin()
 			// end previous
 			if prevTimer != nil {
 				prevTimer.End()
@@ -120,7 +101,7 @@ func createMenuItems(menus *Menus) {
 		item := systray.AddMenuItem(menuItem.Mode, menuItem.ToolTip)
 		_, ok := menuMap[menuItem.Mode]
 		if !ok {
-			menuMap[menuItem.Mode] = &Timer{false, time.Time{}, 0, "", item}
+			menuMap[menuItem.Mode] = &timer.Timer{false, time.Time{}, 0, "", item}
 		} else {
 			// already present update item
 			prevItem := menuMap[menuItem.Mode]
@@ -162,14 +143,14 @@ func onReady() {
 }
 
 func onExit() {
+	// last selected timer value
+	// to be saved
 	if prevModeSelected != "" {
 		lastTimer := menuMap[prevModeSelected]
 		lastTimer.End()
 	}
 	b, err := json.Marshal(menuMap)
-	if err != nil {
-		log.Fatal("Error while Marshaling menuMap")
-	}
+	utils.FailOnError("Error while Marshaling menuMap", err)
 
-	ioutil.WriteFile(dataSavePath, b, 0644)
+	config.SaveTimerMap(b)
 }

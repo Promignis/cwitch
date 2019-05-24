@@ -1,6 +1,10 @@
 package utils
 
-import "os"
+import (
+	"fmt"
+	"log"
+	"os"
+)
 
 func FileExists(path string) (bool, error) {
 	// there can be cases when file may or may not exist
@@ -10,4 +14,39 @@ func FileExists(path string) (bool, error) {
 		return false, nil
 	}
 	return err != nil, err
+}
+
+// fail if error exists
+// func FailOnError(err error) {
+// 	if err != nil {
+// 		log.Fatalf("Error : %s", err.Error())
+// 	}
+// }
+
+// If error log and panic
+func FailOnError(errorStr string, err error) {
+	if err != nil {
+		log.Fatalf(errorStr)
+	}
+}
+
+// log the error and don't fail
+func LogOnError(err error) {
+	if err != nil {
+		log.Printf("Error : %s\n", err.Error())
+	}
+}
+
+// expects one %s (Error)
+func LogfOnError(formatStr string, err error) {
+	if err != nil {
+		log.Printf(formatStr, err.Error())
+	}
+}
+
+func AddErrorIfExists(formatStr string, err error) string {
+	if err != nil {
+		return fmt.Sprintf(formatStr, err.Error())
+	}
+	return ""
 }

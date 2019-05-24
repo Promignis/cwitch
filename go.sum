@@ -20,6 +20,8 @@ github.com/oxtoacart/bpool v0.0.0-20190227141107-8c4636f812cc h1:uhnyuvDwdKbjemA
 github.com/oxtoacart/bpool v0.0.0-20190227141107-8c4636f812cc/go.mod h1:L3UMQOThbttwfYRNFOWLLVXMhk5Lkio4GGOtw5UrxS0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/shibukawa/configdir v0.0.0-20170330084843-e180dbdc8da0 h1:Xuk8ma/ibJ1fOy4Ee11vHhUFHQNpHhrBneOCNHVXS5w=
+github.com/shibukawa/configdir v0.0.0-20170330084843-e180dbdc8da0/go.mod h1:7AwjWCpdPhkSmNAgUv5C7EJ4AbmjEB3r047r3DXWu3Y=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.3.0 h1:TivCn/peBQ7UY8ooIcPgZFpTNSz0Q2U6UrFlUfqbe0Q=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
