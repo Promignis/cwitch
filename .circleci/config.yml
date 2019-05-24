@@ -1,0 +1,12 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.12
+
+    working_directory: /go/src/github.com/promignis/cwitch
+    steps:
+      - checkout
+      - run: export GO111MODULE=on
+      - run: go install .
+      - run: go build .
