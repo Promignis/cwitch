@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"hash/fnv"
 	"log"
 	"os"
 )
@@ -49,4 +50,13 @@ func AddErrorIfExists(formatStr string, err error) string {
 		return fmt.Sprintf(formatStr, err.Error())
 	}
 	return ""
+}
+
+// generate a hash of the mode
+// used as an Id and used
+// to find previously same mode
+func HashMode(mode string) uint32 {
+	h := fnv.New32a()
+	h.Write([]byte(mode))
+	return h.Sum32()
 }

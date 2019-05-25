@@ -12,49 +12,23 @@ import (
 	"github.com/getlantern/systray"
 	"github.com/promignis/cwitch/config"
 	"github.com/promignis/cwitch/icon"
+	"github.com/promignis/cwitch/menu"
 	"github.com/promignis/cwitch/timer"
 	"github.com/promignis/cwitch/utils"
 )
 
+// currently the file used to store
 const menuDataPath = "./data.json"
 
-type Menu struct {
-	Mode    string `json:"mode"`
-	ToolTip string `json:"tooltip"`
-}
-
-type Menus struct {
-	Modes []*Menu `json:"modes"`
-}
-
-var menus *Menus
-var prevModeSelected string
-
-var menuMap timer.TimerMap
-
 func InitMenu() {
-	menuMap = config.GetTimerMap()
-
-	// isExist, err := utils.FileExists(dataSavePath)
-
-	// if isExist && err != nil {
-	// 	// some error while checking file stat
-	// 	log.Fatalf("Error while checking file existence %s", err.Error())
-	// } else if isExist && err == nil {
-	// 	// actually file exists
-	// 	menuMapData, err := ioutil.ReadFile(dataSavePath)
-	// 	if err != nil {
-	// 		log.Printf("Error reading file %s", dataSavePath)
-	// 	}
-	// 	json.Unmarshal(menuMapData, &timer.MenuMap)
-	// }
+	menu.MenuMap = config.GetTimerMap()
 
 	// fetch value from data.json
 	menuData, err := ioutil.ReadFile(menuDataPath)
 
 	utils.FailOnError(fmt.Sprintf("Error in reading file %s", menuDataPath), err)
 
-	json.Unmarshal(menuData, &menus)
+	json.Unmarshal(menuData, &menu.AllMenus)
 }
 
 func main() {
@@ -64,19 +38,19 @@ func main() {
 
 }
 
-func HandleMenuItem(menuStr string, ch chan struct{}) {
+func HandleMenuItem(hashMode uint32, ch chan struct{}) {
 	for m := range ch {
 		// just an empty struct
 		_ = m
-		currentTimer := menuMap[menuStr]
+		currentTimer := menu.MenuMap[hashMode]
 
 		var prevTimer *timer.Timer
-		if prevModeSelected == "" {
+		if menu.PrevSelected == 0 {
 			// first time
-			prevModeSelected = menuStr
+			menu.PrevSelected = hashMode
 		} else {
 			// prevTimer exists
-			prevTimer = menuMap[prevModeSelected]
+			prevTimer = menu.MenuMap[menu.PrevSelected]
 		}
 
 		if currentTimer.IsEnabled {
@@ -91,28 +65,37 @@ func HandleMenuItem(menuStr string, ch chan struct{}) {
 			}
 		}
 		// store the current selected value
-		prevModeSelected = menuStr
+		menu.PrevSelected = hashMode
 	}
 
 }
 
-func createMenuItems(menus *Menus) {
+// create Menu items, timers
+// and stores both in timerMap
+func createMenuItems(menus *menu.Menus) {
 	for _, menuItem := range menus.Modes {
 		item := systray.AddMenuItem(menuItem.Mode, menuItem.ToolTip)
-		_, ok := menuMap[menuItem.Mode]
+
+		// generate hash from mode
+		hashMode := utils.HashMode(menuItem.Mode)
+		_, ok := menu.MenuMap[hashMode]
+
 		if !ok {
-			menuMap[menuItem.Mode] = &timer.Timer{false, time.Time{}, 0, "", item}
+			menu.MenuMap[hashMode] = &timer.Timer{hashMode, menuItem.Mode, false, time.Time{}, 0, "", item}
 		} else {
 			// already present update item
-			prevItem := menuMap[menuItem.Mode]
+			prevItem := menu.MenuMap[hashMode]
 			if prevItem != nil {
 				prevItem.MenuItem = item
 			}
 		}
-		go HandleMenuItem(menuItem.Mode, item.ClickedCh)
+		go HandleMenuItem(hashMode, item.ClickedCh)
 	}
 }
 
+// for things like ctrl+c
+// and similar aborts
+// before exiting save changes
 func HandleInterrupts() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
@@ -126,17 +109,16 @@ func HandleInterrupts() {
 }
 
 func onReady() {
-	createMenuItems(menus)
-	// systray.SetTitle("cwitch")
+	createMenuItems(menu.AllMenus)
 	systray.SetIcon(icon.Data)
 
 	systray.SetTooltip("Switch between activities consciously")
-	mQuit := systray.AddMenuItem("Quit", "Quit the whole app")
+	mQuit := systray.AddMenuItem("Quit", "Quit cwitch")
 
 	go func() {
 		<-mQuit.ClickedCh
 		systray.Quit()
-		log.Println("Quitting")
+		log.Println("Quitting cwitch")
 	}()
 
 	go HandleInterrupts()
@@ -145,12 +127,12 @@ func onReady() {
 func onExit() {
 	// last selected timer value
 	// to be saved
-	if prevModeSelected != "" {
-		lastTimer := menuMap[prevModeSelected]
+	if menu.PrevSelected != 0 {
+		lastTimer := menu.MenuMap[menu.PrevSelected]
 		lastTimer.End()
 	}
-	b, err := json.Marshal(menuMap)
-	utils.FailOnError("Error while Marshaling menuMap", err)
+	b, err := json.Marshal(menu.MenuMap)
+	utils.FailOnError("Error while Marshaling menu.MenuMap", err)
 
 	config.SaveTimerMap(b)
 }

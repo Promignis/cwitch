@@ -2,23 +2,28 @@
   "modes": [
     {
       "mode": "Reading Articles (Tech)",
-      "tooltip": "Learning technology"
+      "tooltip": "Learning technology",
+      "emoji": "📚"
     },
     {
       "mode": "Research",
-      "tooltip": "Researching something"
+      "tooltip": "Researching something",
+      "emoji": "🔬"
     },
     {
-      "mode": "Programming",
-      "tooltip": "General programming"
+      "mode": " Programming",
+      "tooltip": "General programming",
+      "emoji": "🤖"
     },
     {
       "mode": "Reading Articles (Science)",
-      "tooltip": "General programming"
+      "tooltip": "General programming",
+      "emoji": "🧬 "
     },
     {
       "mode": "Mobile Chill",
-      "tooltip": "Mobile"
+      "tooltip": "Mobile",
+      "emoji": "🛌"
     },
     {
       "mode": "cwitch programming",
@@ -26,7 +31,8 @@
     },
     {
       "mode": "Writing",
-      "tooltip": "Writing"
+      "tooltip": "Writing",
+      "emoji": "✍️"
     }
   ]
 }
