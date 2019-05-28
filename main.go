@@ -60,7 +60,7 @@ func HandleMenuItem(hashMode uint32, ch chan struct{}) {
 		} else {
 			currentTimer.Begin()
 			// end previous
-			if prevTimer != nil {
+			if prevTimer != nil && prevTimer != currentTimer {
 				prevTimer.End()
 			}
 		}
