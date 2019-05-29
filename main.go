@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"os/signal"
-	"time"
 
 	"github.com/getlantern/systray"
 	"github.com/promignis/cwitch/config"
@@ -45,6 +44,7 @@ func HandleMenuItem(hashMode uint32, ch chan struct{}, cwitchItem *menu.CwitchIt
 		// just an empty struct
 		_ = m
 		currentTimer := menu.MenuMap[hashMode]
+		menu.CTray.UpdateItem(cwitchItem)
 
 		if prevCwitchItem == nil {
 			// first time
@@ -78,7 +78,7 @@ func createMenuItems(menus *menu.Menus) {
 
 		cwitchItem := &menu.CwitchItem{menuItem.Mode, menuItem, nil}
 		if !ok {
-			newTimer := &timer.Timer{menuItem.Mode, false, time.Time{}, 0, "", item}
+			newTimer := timer.NewTimer(menuItem.Mode, item)
 			menu.MenuMap[hashMode] = newTimer
 			cwitchItem.Timer = newTimer
 		} else {
@@ -98,7 +98,7 @@ func createMenuItems(menus *menu.Menus) {
 // for things like ctrl+c
 // and similar aborts
 // before exiting save changes
-func HandleInterrupts() {
+func handleInterrupts() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	go func() {
@@ -123,10 +123,13 @@ func onReady() {
 		log.Println("Quitting cwitch")
 	}()
 
-	go HandleInterrupts()
+	go handleInterrupts()
+
+	go menu.CTray.PerSecondUpdates()
 }
 
 func onExit() {
+	menu.CTray.Exit()
 	// last selected timer value
 	// to be saved
 	if prevCwitchItem != nil {

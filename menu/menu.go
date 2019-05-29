@@ -3,6 +3,7 @@ package menu
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/getlantern/systray"
 	"github.com/promignis/cwitch/timer"
@@ -23,12 +24,49 @@ var (
 	AllMenus *Menus
 )
 
+var CTray = &CwitchTray{"", nil, time.NewTicker(time.Second)}
+
 // abstraction of current
 // systray title
 // +emoji and pretty time
-type Systray struct {
+type CwitchTray struct {
 	Title           string
 	CurrentMenuItem *CwitchItem
+	perSecTicker    *time.Ticker
+}
+
+func (c *CwitchTray) UpdateItem(item *CwitchItem) {
+	c.CurrentMenuItem = item
+}
+
+func (c *CwitchTray) UpdateTitle() {
+	elapsed := c.CurrentMenuItem.Timer.PrettyElapsed
+	emoji := c.CurrentMenuItem.Menu.Emoji
+	var title string
+	// if emoji is present
+	// use it as well
+	if emoji != "" {
+		title = fmt.Sprintf("%s %s", emoji, elapsed)
+	} else {
+		title = elapsed
+	}
+	c.Title = title
+	systray.SetTitle(title)
+}
+
+func (c *CwitchTray) PerSecondUpdates() {
+	for t := range c.perSecTicker.C {
+		_ = t
+		if c.CurrentMenuItem != nil {
+			c.CurrentMenuItem.Timer.Update()
+			c.CurrentMenuItem.Update()
+		}
+	}
+}
+
+// clean all resources
+func (c *CwitchTray) Exit() {
+	c.perSecTicker.Stop()
 }
 
 // Type is convoluted for now
@@ -82,19 +120,4 @@ func (m *CwitchItem) UpdateTitle() {
 func (m *CwitchItem) Update() {
 	m.UpdateTitle()
 	m.Timer.MenuItem.SetTooltip(m.Timer.PrettyElapsed)
-}
-
-func (s *Systray) UpdateTitle() {
-	elapsed := s.CurrentMenuItem.Timer.PrettyElapsed
-	emoji := s.CurrentMenuItem.Menu.Emoji
-	var title string
-	// if emoji is present
-	// use it as well
-	if emoji != "" {
-		title = fmt.Sprintf("%s %s", emoji, elapsed)
-	} else {
-		title = elapsed
-	}
-	s.Title = title
-	systray.SetTitle(title)
 }

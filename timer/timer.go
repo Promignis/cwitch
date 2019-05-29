@@ -12,9 +12,14 @@ type Timer struct {
 	Mode          string
 	IsEnabled     bool
 	OnStart       time.Time
+	LastUpdate    time.Time
 	Elapsed       time.Duration
 	PrettyElapsed string
 	MenuItem      *systray.MenuItem `json:"-"`
+}
+
+func NewTimer(mode string, item *systray.MenuItem) *Timer {
+	return &Timer{mode, false, time.Time{}, time.Time{}, 0, "", item}
 }
 
 // enable it, start timer
@@ -23,8 +28,19 @@ func (t *Timer) Begin() {
 	t.IsEnabled = true
 	t.OnStart = time.Now()
 	t.MenuItem.Check()
+	t.LastUpdate = time.Now()
 	// Anytime a timer starts
 	// show it's current time
+}
+
+// Update the timer values
+func (t *Timer) Update() {
+	t.Elapsed += time.Since(t.LastUpdate)
+	durTime := durafmt.Parse(t.Elapsed).String()
+	splitTime := strings.Split(durTime, " ")
+	untilLast := len(splitTime) - 2
+	t.PrettyElapsed = strings.Join(splitTime[:untilLast], " ")
+	t.LastUpdate = time.Now()
 }
 
 // mark it IsEnabled false,
@@ -33,11 +49,7 @@ func (t *Timer) Begin() {
 // uncheck
 func (t *Timer) End() {
 	t.IsEnabled = false
-	t.Elapsed += time.Since(t.OnStart)
-	time := durafmt.Parse(t.Elapsed).String()
-	splitTime := strings.Split(time, " ")
-	untilLast := len(splitTime) - 2
-	t.PrettyElapsed = strings.Join(splitTime[:untilLast], " ")
+	t.Update()
 	t.MenuItem.Uncheck()
 }
 
