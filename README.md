@@ -15,3 +15,19 @@ tracks the time you spend between these modes.
 Great way to switch between tasks, modes etc consciously and mindfully.
 
 It's aim is to help you reduce unconscious and mindless activities(browser tab switches, social media, youtube etc)
+
+## Cwitch Json file format
+
+```
+{
+  "modes": [
+    {
+      "mode": "Reading",
+      "emoji": "📚"
+    }
+  ]
+}
+```
+
+`--data` flag to specify the path to Cwitch Json file
+Node: (optional, if not specificed will look for `data.json` in local folder)

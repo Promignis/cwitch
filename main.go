@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -20,10 +21,12 @@ import (
 const menuDataPath = "./data.json"
 
 func InitMenu() {
+	dataFilePath := flag.String("data", menuDataPath, "Cwitch json file path")
+	flag.Parse()
 	menu.MenuMap = config.GetTimerMap()
 
 	// fetch value from data.json
-	menuData, err := ioutil.ReadFile(menuDataPath)
+	menuData, err := ioutil.ReadFile(*dataFilePath)
 
 	utils.FailOnError(fmt.Sprintf("Error in reading file %s", menuDataPath), err)
 
