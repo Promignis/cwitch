@@ -11,6 +11,7 @@ require (
 	github.com/getlantern/ops v0.0.0-20190325191751-d70cb0d6f85f // indirect
 	github.com/getlantern/systray v0.0.0-20190131073753-26d5b920200d
 	github.com/go-stack/stack v1.8.0 // indirect
+	github.com/hako/durafmt v0.0.0-20180520121703-7b7ae1e72ead
 	github.com/oxtoacart/bpool v0.0.0-20190227141107-8c4636f812cc // indirect
 	github.com/shibukawa/configdir v0.0.0-20170330084843-e180dbdc8da0
 	github.com/stretchr/testify v1.3.0 // indirect

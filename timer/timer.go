@@ -1,13 +1,14 @@
 package timer
 
 import (
+	"strings"
 	"time"
 
 	"github.com/getlantern/systray"
+	"github.com/hako/durafmt"
 )
 
 type Timer struct {
-	Id            uint32 `json:"-"`
 	Mode          string
 	IsEnabled     bool
 	OnStart       time.Time
@@ -24,7 +25,6 @@ func (t *Timer) Begin() {
 	t.MenuItem.Check()
 	// Anytime a timer starts
 	// show it's current time
-	// systray.SetTitle(t.PrettyElapsed)
 }
 
 // mark it IsEnabled false,
@@ -34,7 +34,10 @@ func (t *Timer) Begin() {
 func (t *Timer) End() {
 	t.IsEnabled = false
 	t.Elapsed += time.Since(t.OnStart)
-	t.PrettyElapsed = t.Elapsed.String()
+	time := durafmt.Parse(t.Elapsed).String()
+	splitTime := strings.Split(time, " ")
+	untilLast := len(splitTime) - 2
+	t.PrettyElapsed = strings.Join(splitTime[:untilLast], " ")
 	t.MenuItem.Uncheck()
 }
 

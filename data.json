@@ -2,36 +2,29 @@
   "modes": [
     {
       "mode": "Reading Articles (Tech)",
-      "tooltip": "Learning technology",
       "emoji": "📚"
     },
     {
       "mode": "Research",
-      "tooltip": "Researching something",
       "emoji": "🔬"
     },
     {
-      "mode": " Programming",
-      "tooltip": "General programming",
+      "mode": "Programming",
       "emoji": "🤖"
     },
     {
       "mode": "Reading Articles (Science)",
-      "tooltip": "General programming",
       "emoji": "🧬 "
     },
     {
       "mode": "Mobile Chill",
-      "tooltip": "Mobile",
       "emoji": "🛌"
     },
     {
-      "mode": "cwitch programming",
-      "tooltip": "cwitch"
+      "mode": "cwitch programming"
     },
     {
       "mode": "Writing",
-      "tooltip": "Writing",
       "emoji": "✍️"
     }
   ]

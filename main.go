@@ -35,61 +35,63 @@ func main() {
 	InitMenu()
 	// Should be called at the very beginning of main().
 	systray.Run(onReady, onExit)
-
 }
 
-func HandleMenuItem(hashMode uint32, ch chan struct{}) {
+// stores last selected cwitchItem
+var prevCwitchItem *menu.CwitchItem
+
+func HandleMenuItem(hashMode uint32, ch chan struct{}, cwitchItem *menu.CwitchItem) {
 	for m := range ch {
 		// just an empty struct
 		_ = m
 		currentTimer := menu.MenuMap[hashMode]
 
-		var prevTimer *timer.Timer
-		if menu.PrevSelected == 0 {
+		if prevCwitchItem == nil {
 			// first time
-			menu.PrevSelected = hashMode
-		} else {
-			// prevTimer exists
-			prevTimer = menu.MenuMap[menu.PrevSelected]
+			prevCwitchItem = cwitchItem
 		}
 
 		if currentTimer.IsEnabled {
 			// clicked on what is already enabled
 			// end it
-			currentTimer.End()
+			cwitchItem.EndItem()
 		} else {
-			currentTimer.Begin()
-			// end previous
-			if prevTimer != nil && prevTimer != currentTimer {
-				prevTimer.End()
+			cwitchItem.StartItem()
+			if prevCwitchItem != cwitchItem {
+				prevCwitchItem.EndItem()
 			}
 		}
-		// store the current selected value
-		menu.PrevSelected = hashMode
+		prevCwitchItem = cwitchItem
 	}
-
 }
 
 // create Menu items, timers
 // and stores both in timerMap
 func createMenuItems(menus *menu.Menus) {
 	for _, menuItem := range menus.Modes {
+		// menuItem := menu.MenuItem{menu.Mode, menu, timer}
 		item := systray.AddMenuItem(menuItem.Mode, menuItem.ToolTip)
 
 		// generate hash from mode
 		hashMode := utils.HashMode(menuItem.Mode)
 		_, ok := menu.MenuMap[hashMode]
 
+		cwitchItem := &menu.CwitchItem{menuItem.Mode, menuItem, nil}
 		if !ok {
-			menu.MenuMap[hashMode] = &timer.Timer{hashMode, menuItem.Mode, false, time.Time{}, 0, "", item}
+			newTimer := &timer.Timer{menuItem.Mode, false, time.Time{}, 0, "", item}
+			menu.MenuMap[hashMode] = newTimer
+			cwitchItem.Timer = newTimer
 		} else {
 			// already present update item
-			prevItem := menu.MenuMap[hashMode]
-			if prevItem != nil {
-				prevItem.MenuItem = item
+			// and cwitch item timer
+			prevTimer := menu.MenuMap[hashMode]
+			if prevTimer != nil {
+				prevTimer.MenuItem = item
+				cwitchItem.Timer = prevTimer
 			}
 		}
-		go HandleMenuItem(hashMode, item.ClickedCh)
+		cwitchItem.Update()
+		go HandleMenuItem(hashMode, item.ClickedCh, cwitchItem)
 	}
 }
 
@@ -127,9 +129,8 @@ func onReady() {
 func onExit() {
 	// last selected timer value
 	// to be saved
-	if menu.PrevSelected != 0 {
-		lastTimer := menu.MenuMap[menu.PrevSelected]
-		lastTimer.End()
+	if prevCwitchItem != nil {
+		prevCwitchItem.EndItem()
 	}
 	b, err := json.Marshal(menu.MenuMap)
 	utils.FailOnError("Error while Marshaling menu.MenuMap", err)
