@@ -36,4 +36,5 @@ eg: `cwitch --data ./data.main.json`
 
 
 `--debug` flag for seeing debug logs
+
 eg: `cwitch --debug`
