@@ -5,7 +5,6 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/signal"
 
@@ -15,14 +14,30 @@ import (
 	"github.com/promignis/cwitch/menu"
 	"github.com/promignis/cwitch/timer"
 	"github.com/promignis/cwitch/utils"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 // currently the file used to store
 const menuDataPath = "./data.json"
 
+// initialize flags
+// data file
+// logger
 func InitMenu() {
 	dataFilePath := flag.String("data", menuDataPath, "Cwitch json file path")
+	// to show debugging logs
+	debug := flag.Bool("debug", false, "Run Cwitch in debug mode")
 	flag.Parse()
+
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	if *debug {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	}
+
+	// logger
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+
 	menu.MenuMap = config.GetTimerMap()
 
 	// fetch value from data.json
@@ -31,6 +46,7 @@ func InitMenu() {
 	utils.FailOnError(fmt.Sprintf("Error in reading file %s", menuDataPath), err)
 
 	json.Unmarshal(menuData, &menu.AllMenus)
+	log.Info().Msg("Data file loaded")
 }
 
 func main() {
@@ -53,6 +69,8 @@ func HandleMenuItem(hashMode uint32, ch chan struct{}, cwitchItem *menu.CwitchIt
 			// first time
 			prevCwitchItem = cwitchItem
 		}
+
+		log.Info().Msgf("%s mode selected", currentTimer.Mode)
 
 		if currentTimer.IsEnabled {
 			// clicked on what is already enabled
@@ -106,7 +124,7 @@ func handleInterrupts() {
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		for sig := range c {
-			log.Printf("Sig %s recieved\n", sig.String())
+			log.Info().Msgf("Sig %s recieved", sig.String())
 			onExit()
 			os.Exit(1)
 		}
@@ -123,15 +141,16 @@ func onReady() {
 	go func() {
 		<-mQuit.ClickedCh
 		systray.Quit()
-		log.Println("Quitting cwitch")
+		log.Info().Msg("Quitting cwitch")
 	}()
 
 	go handleInterrupts()
 
-	go menu.CTray.PerSecondUpdates()
+	menu.CTray.StartTicker()
 }
 
 func onExit() {
+	log.Info().Msg("Systray onExit called")
 	menu.CTray.Exit()
 	// last selected timer value
 	// to be saved
@@ -142,4 +161,6 @@ func onExit() {
 	utils.FailOnError("Error while Marshaling menu.MenuMap", err)
 
 	config.SaveTimerMap(b)
+	log.Debug().Msgf("Saving timer %s", string(b))
+	log.Info().Msg("Saving timermap")
 }

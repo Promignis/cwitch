@@ -3,8 +3,9 @@ package utils
 import (
 	"fmt"
 	"hash/fnv"
-	"log"
 	"os"
+
+	"github.com/rs/zerolog/log"
 )
 
 func FileExists(path string) (bool, error) {
@@ -17,34 +18,25 @@ func FileExists(path string) (bool, error) {
 	return err != nil, err
 }
 
-// fail if error exists
-// func FailOnError(err error) {
-// 	if err != nil {
-// 		log.Fatalf("Error : %s", err.Error())
-// 	}
-// }
-
 // If error log and panic
 func FailOnError(errorStr string, err error) {
 	if err != nil {
-		log.Fatalf(errorStr)
+		log.Fatal().
+			Err(err).
+			Msgf(errorStr)
 	}
 }
 
 // log the error and don't fail
 func LogOnError(err error) {
 	if err != nil {
-		log.Printf("Error : %s\n", err.Error())
+		log.Fatal().
+			Err(err).
+			Msgf("Error occured : %s", err.Error())
 	}
 }
 
-// expects one %s (Error)
-func LogfOnError(formatStr string, err error) {
-	if err != nil {
-		log.Printf(formatStr, err.Error())
-	}
-}
-
+// Add error to format string
 func AddErrorIfExists(formatStr string, err error) string {
 	if err != nil {
 		return fmt.Sprintf(formatStr, err.Error())

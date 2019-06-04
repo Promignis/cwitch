@@ -13,7 +13,8 @@ require (
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/hako/durafmt v0.0.0-20180520121703-7b7ae1e72ead
 	github.com/oxtoacart/bpool v0.0.0-20190227141107-8c4636f812cc // indirect
+	github.com/rs/zerolog v1.14.3
 	github.com/shibukawa/configdir v0.0.0-20170330084843-e180dbdc8da0
 	github.com/stretchr/testify v1.3.0 // indirect
-	golang.org/x/sys v0.0.0-20190522044717-8097e1b27ff5 // indirect
+	golang.org/x/sys v0.0.0-20190602015325-4c4f7f33c9ed // indirect
 )

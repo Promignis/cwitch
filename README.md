@@ -31,3 +31,9 @@ It's aim is to help you reduce unconscious and mindless activities(browser tab s
 
 `--data` flag to specify the path to Cwitch Json file
 Node: (optional, if not specificed will look for `data.json` in local folder)
+
+eg: `cwitch --data ./data.main.json`
+
+
+`--debug` flag for seeing debug logs
+eg: `cwitch --debug`

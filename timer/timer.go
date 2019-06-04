@@ -6,6 +6,7 @@ import (
 
 	"github.com/getlantern/systray"
 	"github.com/hako/durafmt"
+	"github.com/rs/zerolog/log"
 )
 
 type Timer struct {
@@ -25,6 +26,7 @@ func NewTimer(mode string, item *systray.MenuItem) *Timer {
 // enable it, start timer
 // and add check mark
 func (t *Timer) Begin() {
+	log.Info().Msgf("Starting mode %s", t.Mode)
 	t.IsEnabled = true
 	t.OnStart = time.Now()
 	t.MenuItem.Check()
@@ -41,6 +43,7 @@ func (t *Timer) Update() {
 	untilLast := len(splitTime) - 2
 	t.PrettyElapsed = strings.Join(splitTime[:untilLast], " ")
 	t.LastUpdate = time.Now()
+	log.Debug().Msgf("Update timer running %s", t.PrettyElapsed)
 }
 
 // mark it IsEnabled false,
@@ -48,6 +51,7 @@ func (t *Timer) Update() {
 // store easy to read timer value
 // uncheck
 func (t *Timer) End() {
+	log.Info().Msgf("Ending mode %s", t.Mode)
 	t.IsEnabled = false
 	t.Update()
 	t.MenuItem.Uncheck()
