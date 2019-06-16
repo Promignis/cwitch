@@ -11,14 +11,14 @@ import (
 	"github.com/getlantern/systray"
 	"github.com/promignis/cwitch/config"
 	"github.com/promignis/cwitch/icon"
+	"github.com/promignis/cwitch/logger"
 	"github.com/promignis/cwitch/menu"
 	"github.com/promignis/cwitch/timer"
 	"github.com/promignis/cwitch/utils"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
-// currently the file used to store
+// currently the default file as data
 const menuDataPath = "./data.json"
 
 // initialize flags
@@ -46,7 +46,7 @@ func InitMenu() {
 	utils.FailOnError(fmt.Sprintf("Error in reading file %s", menuDataPath), err)
 
 	json.Unmarshal(menuData, &menu.AllMenus)
-	log.Info().Msg("Data file loaded")
+	logger.Log.Info().Msg("Data file loaded")
 }
 
 func main() {
@@ -70,7 +70,7 @@ func HandleMenuItem(hashMode uint32, ch chan struct{}, cwitchItem *menu.CwitchIt
 			prevCwitchItem = cwitchItem
 		}
 
-		log.Info().Msgf("%s mode selected", currentTimer.Mode)
+		logger.Log.Info().Msgf("%s mode selected", currentTimer.Mode)
 
 		if currentTimer.IsEnabled {
 			// clicked on what is already enabled
@@ -97,13 +97,14 @@ func createMenuItems(menus *menu.Menus) {
 		hashMode := utils.HashMode(menuItem.Mode)
 		_, ok := menu.MenuMap[hashMode]
 
-		cwitchItem := &menu.CwitchItem{menuItem.Mode, menuItem, nil}
+		cwitchItem := menu.NewCwitchItem(menuItem.Mode, menuItem)
+
 		if !ok {
 			newTimer := timer.NewTimer(menuItem.Mode, item)
 			menu.MenuMap[hashMode] = newTimer
 			cwitchItem.Timer = newTimer
 		} else {
-			// already present update item
+			// already present, update item
 			// and cwitch item timer
 			prevTimer := menu.MenuMap[hashMode]
 			if prevTimer != nil {
@@ -124,7 +125,7 @@ func handleInterrupts() {
 	signal.Notify(c, os.Interrupt)
 	go func() {
 		for sig := range c {
-			log.Info().Msgf("Sig %s recieved", sig.String())
+			logger.Log.Info().Msgf("Sig %s recieved", sig.String())
 			onExit()
 			os.Exit(1)
 		}
@@ -141,7 +142,7 @@ func onReady() {
 	go func() {
 		<-mQuit.ClickedCh
 		systray.Quit()
-		log.Info().Msg("Quitting cwitch")
+		logger.Log.Info().Msg("Quitting cwitch")
 	}()
 
 	go handleInterrupts()
@@ -150,7 +151,7 @@ func onReady() {
 }
 
 func onExit() {
-	log.Info().Msg("Systray onExit called")
+	logger.Log.Info().Msg("Systray onExit called")
 	menu.CTray.Exit()
 	// last selected timer value
 	// to be saved
@@ -161,6 +162,6 @@ func onExit() {
 	utils.FailOnError("Error while Marshaling menu.MenuMap", err)
 
 	config.SaveTimerMap(b)
-	log.Debug().Msgf("Saving timer %s", string(b))
-	log.Info().Msg("Saving timermap")
+	logger.Log.Debug().Msgf("Saving timer %s", string(b))
+	logger.Log.Info().Msg("Saving timermap")
 }

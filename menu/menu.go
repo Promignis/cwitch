@@ -3,11 +3,12 @@ package menu
 import (
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/getlantern/systray"
+	"github.com/promignis/cwitch/logger"
 	"github.com/promignis/cwitch/timer"
-	"github.com/rs/zerolog/log"
 )
 
 type Menu struct {
@@ -25,7 +26,7 @@ var (
 	AllMenus *Menus
 )
 
-var CTray = &CwitchTray{"", nil, time.NewTicker(time.Second)}
+var CTray = &CwitchTray{"", nil, time.NewTicker(time.Second), sync.Mutex{}}
 
 // abstraction of current
 // systray title
@@ -34,10 +35,13 @@ type CwitchTray struct {
 	Title           string
 	CurrentMenuItem *CwitchItem
 	perSecTicker    *time.Ticker
+	Mux             sync.Mutex
 }
 
 func (c *CwitchTray) UpdateItem(item *CwitchItem) {
+	c.Mux.Lock()
 	c.CurrentMenuItem = item
+	c.Mux.Unlock()
 }
 
 func (c *CwitchTray) UpdateTitle() {
@@ -56,32 +60,34 @@ func (c *CwitchTray) UpdateTitle() {
 }
 
 func (c *CwitchTray) PerSecondUpdates() {
-	log.Info().Msg("Starting PerSecondUpdates")
+	logger.Log.Info().Msg("Starting PerSecondUpdates")
 	for t := range c.perSecTicker.C {
-		log.Debug().Msg("PerSecondTick Tick")
+		logger.Log.Debug().Msg("PerSecondTick Tick")
 		_ = t
 		if c.CurrentMenuItem != nil && c.CurrentMenuItem.Timer.IsEnabled {
-			log.Debug().Msgf("Running %s", c.CurrentMenuItem.Timer.Mode)
+			CTray.Mux.Lock()
+			logger.Log.Debug().Msgf("Running %s", c.CurrentMenuItem.Timer.Mode)
 			c.CurrentMenuItem.Timer.Update()
 			c.CurrentMenuItem.Update()
+			CTray.Mux.Unlock()
 		}
 	}
-	log.Info().Msg("Exiting PerSecondUpdates")
+	logger.Log.Info().Msg("Exiting PerSecondUpdates")
 }
 
 // clean all resources
 func (c *CwitchTray) Exit() {
-	log.Info().Msg("Exiting CwitchTray")
+	logger.Log.Info().Msg("Exiting CwitchTray")
 	c.StopTicker()
 }
 
 func (c *CwitchTray) StopTicker() {
-	log.Info().Msg("CwitchTray StopTicker called")
+	logger.Log.Info().Msg("CwitchTray StopTicker called")
 	c.perSecTicker.Stop()
 }
 
 func (c *CwitchTray) StartTicker() {
-	log.Info().Msg("CwitchTray StartTicker called")
+	logger.Log.Info().Msg("CwitchTray StartTicker called")
 	c.perSecTicker = time.NewTicker(time.Second)
 	c.PerSecondUpdates()
 }
@@ -92,19 +98,26 @@ type CwitchItem struct {
 	Title string
 	Menu  *Menu
 	Timer *timer.Timer
-	// menuItem
+}
+
+func NewCwitchItem(title string, menu *Menu) *CwitchItem {
+	return &CwitchItem{title, menu, nil}
 }
 
 func (m *CwitchItem) StartItem() {
-	log.Info().Msg("Starting CwitchItem")
+	CTray.Mux.Lock()
+	logger.Log.Info().Msg("Starting CwitchItem")
 	m.Timer.Begin()
 	m.Update()
+	CTray.Mux.Unlock()
 }
 
 func (m *CwitchItem) EndItem() {
-	log.Info().Msg("Ending CwitchItem")
+	CTray.Mux.Lock()
+	logger.Log.Info().Msg("Ending CwitchItem")
 	m.Timer.End()
 	m.Update()
+	CTray.Mux.Unlock()
 }
 
 func (m *CwitchItem) GetTitle() string {
@@ -130,7 +143,7 @@ func (m *CwitchItem) GetTitle() string {
 
 func (m *CwitchItem) UpdateTitle() {
 	title := m.GetTitle()
-	log.Debug().Msgf("Updating CwitchItem Title %s", title)
+	logger.Log.Debug().Msgf("Updating CwitchItem Title %s", title)
 	m.Title = title
 	m.Timer.MenuItem.SetTitle(title)
 }
@@ -138,8 +151,8 @@ func (m *CwitchItem) UpdateTitle() {
 // update cwitch title
 // and tooltip
 func (m *CwitchItem) Update() {
-	log.Debug().Msg("CwitchItem Update")
+	logger.Log.Debug().Msg("CwitchItem Update")
 	m.UpdateTitle()
-	log.Debug().Msg("Updating tooltip")
+	logger.Log.Debug().Msg("Updating tooltip")
 	m.Timer.MenuItem.SetTooltip(m.Timer.PrettyElapsed)
 }

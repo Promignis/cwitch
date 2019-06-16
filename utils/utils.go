@@ -5,7 +5,7 @@ import (
 	"hash/fnv"
 	"os"
 
-	"github.com/rs/zerolog/log"
+	"github.com/promignis/cwitch/logger"
 )
 
 func FileExists(path string) (bool, error) {
@@ -21,7 +21,7 @@ func FileExists(path string) (bool, error) {
 // If error log and panic
 func FailOnError(errorStr string, err error) {
 	if err != nil {
-		log.Fatal().
+		logger.Log.Fatal().
 			Err(err).
 			Msgf(errorStr)
 	}
@@ -30,7 +30,7 @@ func FailOnError(errorStr string, err error) {
 // log the error and don't fail
 func LogOnError(err error) {
 	if err != nil {
-		log.Fatal().
+		logger.Log.Fatal().
 			Err(err).
 			Msgf("Error occured : %s", err.Error())
 	}

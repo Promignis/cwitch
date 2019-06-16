@@ -40,3 +40,12 @@ func SaveTimerMap(timerData []byte) {
 	// as you lose data
 	utils.FailOnError(utils.AddErrorIfExists("Error while saving TimerMap : %s", err), err)
 }
+
+// not used in logger package
+// to prevent cyclic dependency
+func GetConfigPath() string {
+	configDirs := configdir.New(vendor, appName)
+	folders := configDirs.QueryFolders(configdir.Global)
+	return folders[0].Path
+	//return fmt.Sprintf("%s/%s/%s", configdir.Global, vendor, appName)
+}
