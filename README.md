@@ -29,6 +29,7 @@ It's aim is to help you reduce unconscious and mindless activities(browser tab s
 }
 ```
 
+#### Example output
 ![Cwitch output](assets/output.png)
 
 `--data` flag to specify the path to Cwitch Json file
