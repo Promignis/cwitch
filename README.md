@@ -29,6 +29,8 @@ It's aim is to help you reduce unconscious and mindless activities(browser tab s
 }
 ```
 
+![Cwitch output](assets/output.png)
+
 `--data` flag to specify the path to Cwitch Json file
 Node: (optional, if not specificed will look for `data.json` in local folder)
 
