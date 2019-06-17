@@ -10,13 +10,22 @@ import (
 	"github.com/promignis/cwitch/timer"
 )
 
-func setupSystray() {
+func setupSystray(t *testing.T) {
 	InitMenu()
-	systray.Run(onReady, onExit)
+	// replace to prevent messing with
+	// existing timerMap
+	menu.MenuMap = make(timer.TimerMap)
+	systray.Run(onReady, func() {
+		menu.CTray.Exit()
+		if prevCwitchItem != nil {
+			prevCwitchItem.EndItem()
+		}
+	})
 }
 
 func TestSequentialItemClicks(t *testing.T) {
-	go setupSystray()
+	go setupSystray(t)
+	// enough time to allow setup
 	time.Sleep(time.Second * 3)
 	for _, m := range menu.MenuMap {
 		if m.MenuItem != nil {
