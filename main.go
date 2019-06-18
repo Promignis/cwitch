@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"os"
 	"os/signal"
+	"path"
+	"path/filepath"
 
 	"github.com/getlantern/systray"
 	"github.com/promignis/cwitch/config"
@@ -19,13 +21,16 @@ import (
 )
 
 // currently the default file as data
-const menuDataPath = "./data.json"
+var menuDataPath = "data.json"
 
 // initialize flags
 // data file
 // logger
 func InitMenu() {
-	dataFilePath := flag.String("data", menuDataPath, "Cwitch json file path")
+	currExecPath, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	utils.FailOnError("Error getting executable path", err)
+	fullPath := path.Join(currExecPath, menuDataPath)
+	dataFilePath := flag.String("data", fullPath, "Cwitch json file path")
 	// to show debugging logs
 	debug := flag.Bool("debug", false, "Run Cwitch in debug mode")
 	flag.Parse()
